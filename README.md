@@ -79,11 +79,22 @@ npm run test:exit-tsgo
 npm run compare:exit
 ```
 
+### `noEmitOnError` scenario
+
+See: [`repros/noemit-on-error`](./repros/noemit-on-error)
+
+Command:
+
+```bash
+npm run compare:noemit-on-error
+```
+
+This scenario checks whether a type-error build with `noEmitOnError: true` preserves compatible CLI behavior between classic `tsc` and `typescript-go`.
+
 ---
 
 ## Planned regression scenarios
 
-- `noEmitOnError`
 - declaration emit parity
 - project references (`tsc -b`)
 - diagnostics parity checks
