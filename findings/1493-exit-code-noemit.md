@@ -43,6 +43,8 @@ The issue was acknowledged and a fix PR was opened:
 
 - PR #4407: Restore tsgo exit code for noEmit type errors
 
+The fix scope later expanded beyond the original `Program.Emit` path and now also covers related incremental emit, build, and watch baselines.
+
 Additional maintainer review context:
 - [`../docs/1493-review-notes.md`](../docs/1493-review-notes.md)
 
