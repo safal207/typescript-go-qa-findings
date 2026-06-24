@@ -9,7 +9,8 @@
     "test:exit-tsgo": "node ./scripts/run-tsgo-exit.mjs",
     "compare:exit": "node ./scripts/compare-exit-codes.mjs",
     "compare:noemit-on-error": "node ./scripts/compare-noemit-on-error.mjs",
-    "compare:declaration-emit": "node ./scripts/compare-declaration-emit.mjs"
+    "compare:declaration-emit": "node ./scripts/compare-declaration-emit.mjs",
+    "benchmark:checkers": "node ./scripts/benchmark-checkers.mjs"
   },
   "devDependencies": {
     "typescript": "latest",
