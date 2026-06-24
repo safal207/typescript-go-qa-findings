@@ -13,6 +13,18 @@ During review of PR #4407, **jakebailey** raised a semantic question about the s
 
 **Copilot** replied that this mirrors classic `tsc` behavior for the whole-program `--noEmit` scenario. Even though no files are written, the compiler still follows the exit-status path that leads to `DiagnosticsPresent_OutputsGenerated`, which is why the compatible exit code remains `2`.
 
+## Scope expanded
+
+The fix scope expanded beyond the initial single-path `Program.Emit` case.
+
+PR #4407 now also touches related compiler execution paths and baselines, including:
+
+- incremental emit
+- build baselines
+- watch baselines
+
+This suggests the finding is being handled as a broader compatibility issue across compiler modes, not only as a local exit-code mapping.
+
 ## Why this matters
 
 This is important because it shows the fix is being reviewed against **baseline TypeScript CLI behavior**, not only against the visible numeric exit code.
@@ -27,6 +39,7 @@ That makes the finding stronger from a QA perspective:
 - it is a real compatibility issue
 - it affects CI / automation expectations
 - the fix is being aligned with `tsc` semantics rather than patched superficially
+- the impact reaches multiple compiler modes
 
 ## Repository note
 
