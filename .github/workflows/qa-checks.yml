@@ -1,0 +1,41 @@
+name: QA checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  compatibility-checks:
+    name: Compatibility checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Compare exit code behavior
+        run: npm run compare:exit
+        continue-on-error: true
+
+      - name: Compare noEmitOnError behavior
+        run: npm run compare:noemit-on-error
+        continue-on-error: true
+
+      - name: Compare declaration emit behavior
+        run: npm run compare:declaration-emit
+        continue-on-error: true
+
+      - name: Run benchmark checkers matrix
+        run: npm run benchmark:checkers
+        continue-on-error: true
