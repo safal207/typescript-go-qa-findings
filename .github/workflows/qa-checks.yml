@@ -24,18 +24,31 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Prepare result folders
+        run: |
+          mkdir -p results/ci
+          mkdir -p results/benchmark
+
       - name: Compare exit code behavior
-        run: npm run compare:exit
+        run: npm run compare:exit | tee results/ci/exit-code-noemit.txt
         continue-on-error: true
 
       - name: Compare noEmitOnError behavior
-        run: npm run compare:noemit-on-error
+        run: npm run compare:noemit-on-error | tee results/ci/noemit-on-error.txt
         continue-on-error: true
 
       - name: Compare declaration emit behavior
-        run: npm run compare:declaration-emit
+        run: npm run compare:declaration-emit | tee results/ci/declaration-emit.txt
         continue-on-error: true
 
       - name: Run benchmark checkers matrix
-        run: npm run benchmark:checkers
+        run: npm run benchmark:checkers | tee results/benchmark/checkers-matrix.md
         continue-on-error: true
+
+      - name: Upload QA outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-check-results
+          path: |
+            results/ci/*.txt
+            results/benchmark/*.md
