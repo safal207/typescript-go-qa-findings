@@ -34,7 +34,7 @@ This repository compares classic TypeScript and `typescript-go` in several areas
 
 | ID | Topic | Status | Result |
 |---|---|---:|---|
-| [#1493](https://github.com/microsoft/typescript-go/issues/1493) | `--noEmit` exit code mismatch | confirmed / fix in progress | `tsc` returned exit code `2`, `typescript-go` returned `1` for the same type-error scenario |
+| [#1493](https://github.com/microsoft/typescript-go/issues/1493) | `--noEmit` exit code mismatch | confirmed / PR under maintainer review | `tsc` returned exit code `2`, `typescript-go` returned `1` for the same type-error scenario |
 | [#4406](https://github.com/microsoft/typescript-go/issues/4406) | benchmark observation | completed | benchmark feedback accepted; maintainer suggested trying `--checkers` tuning |
 
 ---
@@ -105,6 +105,18 @@ npm run compare:declaration-emit
 
 This scenario compares exit code and emitted `.d.ts` output for a small exported API surface using interfaces, union types, generics, and a class.
 
+### Project references scenario
+
+See: [`repros/project-references`](./repros/project-references)
+
+Command:
+
+```bash
+npm run compare:project-references
+```
+
+This scenario compares build-mode behavior for a mini-monorepo where `app` depends on `core` through TypeScript project references.
+
 ### Benchmark checkers scenario
 
 See: [`repros/benchmark-sample`](./repros/benchmark-sample)
@@ -134,7 +146,6 @@ This makes the repository useful as a lightweight regression lab rather than a s
 
 ## Planned regression scenarios
 
-- project references (`tsc -b`)
 - diagnostics parity checks
 - `extends` / `paths` / `baseUrl`
 - incremental build behavior
