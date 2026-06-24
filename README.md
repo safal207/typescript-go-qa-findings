@@ -1,5 +1,7 @@
 # TypeScript Go QA Findings
 
+[![QA checks](https://github.com/safal207/typescript-go-qa-findings/actions/workflows/qa-checks.yml/badge.svg)](https://github.com/safal207/typescript-go-qa-findings/actions/workflows/qa-checks.yml)
+
 Independent QA validation of the Go-based TypeScript compiler (`typescript-go`) against classic TypeScript (`tsc`).
 
 This repository collects:
@@ -114,6 +116,19 @@ npm run benchmark:checkers
 ```
 
 This scenario runs a small type-heavy benchmark sample against classic `tsc` and `typescript-go` with several `--checkers` values.
+
+---
+
+## Continuous QA
+
+GitHub Actions runs the current compatibility checks on push, pull request, and manual workflow dispatch.
+
+The workflow stores command outputs as artifacts:
+
+- `results/ci/*.txt`
+- `results/benchmark/*.md`
+
+This makes the repository useful as a lightweight regression lab rather than a static notes archive.
 
 ---
 
