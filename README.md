@@ -103,6 +103,18 @@ npm run compare:declaration-emit
 
 This scenario compares exit code and emitted `.d.ts` output for a small exported API surface using interfaces, union types, generics, and a class.
 
+### Benchmark checkers scenario
+
+See: [`repros/benchmark-sample`](./repros/benchmark-sample)
+
+Command:
+
+```bash
+npm run benchmark:checkers
+```
+
+This scenario runs a small type-heavy benchmark sample against classic `tsc` and `typescript-go` with several `--checkers` values.
+
 ---
 
 ## Planned regression scenarios
@@ -112,7 +124,6 @@ This scenario compares exit code and emitted `.d.ts` output for a small exported
 - `extends` / `paths` / `baseUrl`
 - incremental build behavior
 - watch mode checks
-- benchmark matrix with multiple `--checkers` values
 
 See: [`docs/roadmap.md`](./docs/roadmap.md)
 
