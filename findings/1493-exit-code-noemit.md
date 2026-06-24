@@ -43,6 +43,9 @@ The issue was acknowledged and a fix PR was opened:
 
 - PR #4407: Restore tsgo exit code for noEmit type errors
 
+Additional maintainer review context:
+- [`../docs/1493-review-notes.md`](../docs/1493-review-notes.md)
+
 ## Repro
 
 See: [`../repros/exit-code-noemit`](../repros/exit-code-noemit)
