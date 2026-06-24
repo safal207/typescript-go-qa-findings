@@ -1,0 +1,16 @@
+{
+  "name": "typescript-go-qa-findings",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "QA findings, reproducible checks, and compatibility notes for the Go-based TypeScript compiler.",
+  "scripts": {
+    "test:exit-tsc": "node ./scripts/run-tsc-exit.mjs",
+    "test:exit-tsgo": "node ./scripts/run-tsgo-exit.mjs",
+    "compare:exit": "node ./scripts/compare-exit-codes.mjs"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "@typescript/native-preview": "latest"
+  }
+}
