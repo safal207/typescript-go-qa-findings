@@ -1,0 +1,9 @@
+{
+  "name": "exit-code-noemit-repro",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "tsc": "tsc -p .",
+    "tsgo": "tsgo -p ."
+  }
+}
