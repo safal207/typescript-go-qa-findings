@@ -1,0 +1,1 @@
+# typescript-go-qa-findings
