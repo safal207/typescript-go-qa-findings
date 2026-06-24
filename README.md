@@ -91,11 +91,22 @@ npm run compare:noemit-on-error
 
 This scenario checks whether a type-error build with `noEmitOnError: true` preserves compatible CLI behavior between classic `tsc` and `typescript-go`.
 
+### Declaration emit scenario
+
+See: [`repros/declaration-emit`](./repros/declaration-emit)
+
+Command:
+
+```bash
+npm run compare:declaration-emit
+```
+
+This scenario compares exit code and emitted `.d.ts` output for a small exported API surface using interfaces, union types, generics, and a class.
+
 ---
 
 ## Planned regression scenarios
 
-- declaration emit parity
 - project references (`tsc -b`)
 - diagnostics parity checks
 - `extends` / `paths` / `baseUrl`
