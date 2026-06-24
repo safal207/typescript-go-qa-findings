@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 
 const cwd = path.resolve("repros/tsconfig-paths-extends");
-const project = "extended-config.json";
+const project = "tsconfig.json";
 
 function run(label, command, args) {
   const result = spawnSync(command, args, {
