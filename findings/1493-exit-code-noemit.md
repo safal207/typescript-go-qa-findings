@@ -1,7 +1,7 @@
 # Finding: exit code mismatch for `--noEmit`
 
 - Issue: https://github.com/microsoft/typescript-go/issues/1493
-- Status: confirmed / fix in progress
+- Status: confirmed / PR under maintainer review
 - Related PR: https://github.com/microsoft/typescript-go/pull/4407
 
 ## Summary
