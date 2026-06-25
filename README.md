@@ -35,7 +35,7 @@ This repository compares classic TypeScript and `typescript-go` in several areas
 
 | ID | Topic | Status | Result |
 |---|---|---:|---|
-| [#1493](https://github.com/microsoft/typescript-go/issues/1493) | `--noEmit` exit code mismatch | confirmed / PR under maintainer review | `tsc` returned exit code `2`, `typescript-go` returned `1` for the same type-error scenario |
+| [#1493](https://github.com/microsoft/typescript-go/issues/1493) | `--noEmit` exit code mismatch | confirmed / active maintainer review via [PR #4407](https://github.com/microsoft/typescript-go/pull/4407) | `tsc` returned exit code `2`, `typescript-go` returned `1`; review expanded the fix across shared `noEmit`, incremental, builder, and watch semantics |
 | [#4435](https://github.com/microsoft/typescript-go/issues/4435) | `tsconfig` extends + `baseUrl` + wildcard `paths` mismatch | reported upstream | `tsc` and `typescript-go` produced different diagnostics and different exit codes for the same config scenario |
 | [#4406](https://github.com/microsoft/typescript-go/issues/4406) | benchmark observation | completed | benchmark feedback accepted; maintainer suggested trying `--checkers` tuning |
 
@@ -47,7 +47,7 @@ This repository is not only a collection of test cases. It is intended as a smal
 
 So far, the work has already produced upstream-facing results:
 
-- **Issue #1493** — exit-code mismatch for `--noEmit` type-error scenarios
+- **Issue #1493** — exit-code mismatch for `--noEmit` type-error scenarios, now addressed by an active fix PR under maintainer review
 - **Issue #4435** — different diagnostics and exit-code behavior for a `tsconfig` scenario using `extends`, `baseUrl`, and wildcard `paths`
 
 These findings matter because they affect:
@@ -68,6 +68,7 @@ The goal of this repository is to make such differences reproducible, visible, a
 
 - Issue: [microsoft/typescript-go#1493](https://github.com/microsoft/typescript-go/issues/1493)
 - Related PR: [microsoft/typescript-go#4407](https://github.com/microsoft/typescript-go/pull/4407)
+- Current PR state: open, mergeable, and under review by `jakebailey` and `andrewbranch`
 
 A minimal project with a type error and `--noEmit` produced equivalent diagnostics in both compilers, but different process exit codes:
 
@@ -75,6 +76,8 @@ A minimal project with a type error and `--noEmit` produced equivalent diagnosti
 - `typescript-go` RC -> exit code `1`
 
 This matters because exit codes are part of the CLI contract used by CI pipelines, shell scripts, wrappers, and automation.
+
+The maintainer review showed that the finding was deeper than a final numeric exit-code mapping. The proposed fix now aligns shared `noEmit` handling across non-incremental and incremental program emit paths and updates builder/watch baselines to match classic `tsc` behavior.
 
 See: [`findings/1493-exit-code-noemit.md`](./findings/1493-exit-code-noemit.md)
 
