@@ -8,6 +8,7 @@ on:
       - "benchmarks/gc-policy/**"
       - "scripts/prepare-gc-policy-benchmark.mjs"
       - "scripts/benchmark-gc-policy.mjs"
+      - "scripts/benchmark-gc-policy-balanced.mjs"
       - "package.json"
   workflow_dispatch:
     inputs:
@@ -16,11 +17,11 @@ on:
         required: false
         default: date-fns-v4.1.0
       warmups:
-        description: Warm-up iterations per GC mode
+        description: Warm-up rounds across all GC modes
         required: false
         default: "1"
       iterations:
-        description: Measured iterations per GC mode
+        description: Measured rounds; use a multiple of five for balanced positions
         required: false
         default: "5"
 
@@ -64,11 +65,11 @@ jobs:
           GC_BENCH_TARGET: ${{ inputs.target || 'date-fns-v4.1.0' }}
         run: npm run benchmark:gc-prepare
 
-      - name: Run GC policy matrix
+      - name: Run order-balanced GC policy matrix
         env:
           GC_BENCH_TARGET: ${{ inputs.target || 'date-fns-v4.1.0' }}
           GC_BENCH_WARMUPS: ${{ inputs.warmups || '1' }}
-          GC_BENCH_ITERATIONS: ${{ inputs.iterations || '3' }}
+          GC_BENCH_ITERATIONS: ${{ inputs.iterations || '5' }}
           GC_BENCH_CAPTURE_EVIDENCE: "1"
         run: npm run benchmark:gc-policy
 
