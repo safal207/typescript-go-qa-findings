@@ -1,6 +1,5 @@
 import {
   copyFileSync,
-  existsSync,
   mkdirSync,
   readFileSync,
   rmSync,
@@ -72,9 +71,15 @@ writeFileSync(
 );
 runChecked("gofmt", ["-w", upstreamMainPath, upstreamInstrumentationPath]);
 
+// Mark the new benchmark-only source as intent-to-add so `git diff` includes it.
+runChecked(
+  "git",
+  ["add", "--intent-to-add", "cmd/tsgo/bench_runtime.go"],
+  typescriptGoDirectory
+);
 const patch = runText(
   "git",
-  ["diff", "--", "cmd/tsgo/main.go", "cmd/tsgo/bench_runtime.go"],
+  ["diff", "--binary", "--", "cmd/tsgo/main.go", "cmd/tsgo/bench_runtime.go"],
   typescriptGoDirectory,
   { allowEmpty: true }
 );
