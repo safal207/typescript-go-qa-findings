@@ -1,11 +1,14 @@
 # AST-shaped arena upper-bound experiment
 
-This benchmark compares two standalone allocation strategies using the same deterministic AST-like traces:
+This benchmark compares three standalone implementations using the same deterministic AST-like traces:
 
-- **Go baseline** — reproduces the typed arena growth strategy currently used by `typescript-go`: new backing storage is obtained with `slices.Grow`, and the requested arena size doubles up to 256 elements.
+- **Current Go baseline** — reproduces the typed arena growth strategy currently used by `typescript-go`: new backing storage is obtained with `slices.Grow`, and the requested arena size doubles up to 256 elements.
+- **Go chunked control** — uses the same geometrically growing chunk strategy as the Rust candidate while staying in Go.
 - **Rust candidate** — a chunked bump-style arena with stable pointers and geometrically growing chunks.
 
-It does not integrate Rust into the TypeScript compiler and does not include FFI. Its purpose is to estimate whether arena allocation and data layout contain enough headroom to justify a deeper subsystem experiment.
+The Go chunked control is essential: it separates gains caused by chunking/data layout from gains caused by the language and runtime. The Rust decision gate is evaluated against Go chunked, not only against the current compiler arena.
+
+This experiment does not integrate Rust into the TypeScript compiler and does not include FFI. Its purpose is to estimate whether arena allocation and data layout contain enough headroom to justify a deeper subsystem experiment.
 
 ## Trace format
 
@@ -33,7 +36,7 @@ Each implementation uses the same SplitMix64 sequence and performs the same logi
 5. traverse every node and child;
 6. produce a wrapping 64-bit checksum and operation count.
 
-Checksum and operation-count equality are hard gates.
+Checksum and operation-count equality across all three implementations are hard gates.
 
 ## Commands
 
@@ -64,11 +67,19 @@ The common runner records:
 
 Go uses `runtime.MemStats`. Rust uses a counting wrapper around the system allocator. Those allocation counters are directionally comparable but are not identical runtime accounting systems; process peak RSS and end-to-end timing remain independent supporting metrics.
 
+## Controlled comparisons
+
+The report separates three effects:
+
+1. **Current Go → Go chunked** — allocation strategy/data-layout effect within Go.
+2. **Current Go → Rust chunked** — total observed effect.
+3. **Go chunked → Rust chunked** — residual language/runtime effect after controlling for chunking.
+
 ## Decision gate
 
-One trace emits a standalone signal only when parity passes and Rust improves either:
+One trace emits a Rust language/runtime signal only when parity passes and Rust improves over **Go chunked** by either:
 
 - median time by at least **20%**, or
 - process peak RSS by at least **25%**.
 
-At least two traces must signal before the experiment advances to a second machine and a profile-based end-to-end upper-bound calculation. Even then, no compiler integration is justified until a subsystem-level boundary avoids per-node or per-token FFI calls.
+At least two traces must signal. Even then, no compiler integration is justified until a profile-based end-to-end upper-bound calculation and a subsystem boundary avoid per-node or per-token FFI calls.
