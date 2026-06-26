@@ -1,4 +1,8 @@
 node_modules/
 .bench-workloads/
+.bench-arena/
+benchmarks/arena/traces/*.trace
+benchmarks/arena/traces/manifest.json
 results/performance/
 results/profiles/
+results/arena/

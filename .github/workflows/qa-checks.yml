@@ -85,3 +85,50 @@ jobs:
             results/performance/**/*.json
             results/performance/**/*.md
             results/profiles/**/*
+
+  arena-upper-bound:
+    name: Go vs Rust arena (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Verify Rust toolchain
+        run: |
+          rustc --version
+          cargo --version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run AST-shaped arena comparison
+        env:
+          ARENA_WARMUPS: 1
+          ARENA_ITERATIONS: 5
+          ARENA_TRACE_SCALE: 1
+        run: npm run benchmark:arena
+
+      - name: Upload arena comparison
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arena-comparison-${{ matrix.os }}
+          if-no-files-found: warn
+          path: |
+            results/arena/*.json
+            results/arena/*.md
