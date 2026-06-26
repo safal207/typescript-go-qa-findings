@@ -87,8 +87,12 @@ jobs:
             results/profiles/**/*
 
   arena-upper-bound:
-    name: Go vs Rust arena upper bound
-    runs-on: ubuntu-latest
+    name: Go vs Rust arena (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -123,7 +127,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: arena-comparison-results
+          name: arena-comparison-${{ matrix.os }}
           if-no-files-found: warn
           path: |
             results/arena/*.json
