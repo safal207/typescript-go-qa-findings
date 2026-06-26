@@ -9,6 +9,7 @@ on:
       - "scripts/prepare-gc-policy-benchmark.mjs"
       - "scripts/benchmark-gc-policy.mjs"
       - "scripts/benchmark-gc-policy-balanced.mjs"
+      - "scripts/analyze-gc-policy-evidence.mjs"
       - "package.json"
   workflow_dispatch:
     inputs:
@@ -72,6 +73,9 @@ jobs:
           GC_BENCH_ITERATIONS: ${{ inputs.iterations || '5' }}
           GC_BENCH_CAPTURE_EVIDENCE: "1"
         run: npm run benchmark:gc-policy
+
+      - name: Analyze pprof and runtime-trace evidence
+        run: npm run benchmark:gc-evidence
 
       - name: Upload GC policy evidence
         if: always()
