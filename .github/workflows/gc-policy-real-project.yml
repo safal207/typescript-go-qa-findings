@@ -13,10 +13,6 @@ on:
       - "package.json"
   workflow_dispatch:
     inputs:
-      target:
-        description: Benchmark target ID from benchmarks/gc-policy/targets.json
-        required: false
-        default: date-fns-v4.1.0
       warmups:
         description: Warm-up rounds across all GC modes
         required: false
@@ -32,11 +28,12 @@ concurrency:
 
 jobs:
   real-project-gc-policy:
-    name: GC policy (${{ matrix.os }})
+    name: GC policy (${{ matrix.target }}, ${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
+        target: [date-fns-v4.1.0, type-fest-v5.7.0]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
 
@@ -63,12 +60,12 @@ jobs:
 
       - name: Prepare pinned compiler and real project
         env:
-          GC_BENCH_TARGET: ${{ inputs.target || 'date-fns-v4.1.0' }}
+          GC_BENCH_TARGET: ${{ matrix.target }}
         run: npm run benchmark:gc-prepare
 
       - name: Run order-balanced GC policy matrix
         env:
-          GC_BENCH_TARGET: ${{ inputs.target || 'date-fns-v4.1.0' }}
+          GC_BENCH_TARGET: ${{ matrix.target }}
           GC_BENCH_WARMUPS: ${{ inputs.warmups || '1' }}
           GC_BENCH_ITERATIONS: ${{ inputs.iterations || '5' }}
           GC_BENCH_CAPTURE_EVIDENCE: "1"
@@ -81,7 +78,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: gc-policy-${{ matrix.os }}
+          name: gc-policy-${{ matrix.target }}-${{ matrix.os }}
           if-no-files-found: warn
           retention-days: 30
           path: |
