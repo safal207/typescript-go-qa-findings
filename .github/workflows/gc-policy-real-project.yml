@@ -10,6 +10,7 @@ on:
       - "scripts/benchmark-gc-policy.mjs"
       - "scripts/benchmark-gc-policy-balanced.mjs"
       - "scripts/analyze-gc-policy-evidence.mjs"
+      - "scripts/aggregate-gc-policy-matrix.mjs"
       - "package.json"
   workflow_dispatch:
     inputs:
@@ -89,3 +90,35 @@ jobs:
             results/gc-policy/**/*.txt
             results/gc-policy/**/*.trace
             results/gc-policy/**/*.pb.gz
+
+  aggregate-evidence:
+    name: Aggregate GC policy evidence
+    needs: real-project-gc-policy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download project and OS evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gc-policy-*
+          path: .gc-policy-artifacts
+
+      - name: Evaluate cross-project evidence gates
+        run: npm run benchmark:gc-aggregate
+
+      - name: Upload cross-project matrix
+        uses: actions/upload-artifact@v4
+        with:
+          name: gc-policy-cross-project-matrix
+          retention-days: 30
+          path: |
+            results/gc-policy-matrix/*.json
+            results/gc-policy-matrix/*.md
