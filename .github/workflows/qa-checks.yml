@@ -21,6 +21,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
       - name: Install dependencies
         run: npm install
 
@@ -29,6 +34,7 @@ jobs:
           mkdir -p results/ci
           mkdir -p results/benchmark
           mkdir -p results/performance
+          mkdir -p results/profiles
 
       - name: Compare exit code behavior
         run: npm run compare:exit | tee results/ci/exit-code-noemit.txt
@@ -54,19 +60,28 @@ jobs:
         run: npm run benchmark:checkers | tee results/benchmark/checkers-matrix.md
         continue-on-error: true
 
-      - name: Run statistical baseline smoke
+      - name: Run generated workload matrix
         env:
           BENCH_WARMUPS: 1
           BENCH_ITERATIONS: 3
           BENCH_CHECKERS: 1,2,4,8
-        run: npm run benchmark:baseline
+        run: npm run benchmark:matrix
+
+      - name: Capture TypeScript Go profiles
+        env:
+          PROFILE_WORKLOAD: few-large-files
+          PROFILE_CHECKERS: 4
+        run: npm run profile:tsgo
 
       - name: Upload QA outputs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: qa-check-results
+          if-no-files-found: warn
           path: |
             results/ci/*.txt
             results/benchmark/*.md
-            results/performance/*.json
-            results/performance/*.md
+            results/performance/**/*.json
+            results/performance/**/*.md
+            results/profiles/**/*
