@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
   copyFileSync,
   mkdirSync,
@@ -71,7 +72,6 @@ writeFileSync(
 );
 runChecked("gofmt", ["-w", upstreamMainPath, upstreamInstrumentationPath]);
 
-// Mark the new benchmark-only source as intent-to-add so `git diff` includes it.
 runChecked(
   "git",
   ["add", "--intent-to-add", "cmd/tsgo/bench_runtime.go"],
@@ -95,6 +95,10 @@ runChecked(
 console.error(`[prepare] cloning target ${target.id} (${target.ref})`);
 cloneRef(target.repository, target.ref, targetDirectory);
 const targetCommit = runText("git", ["rev-parse", "HEAD"], targetDirectory);
+const generatedFiles = writeGeneratedTargetFiles(
+  target.generatedFiles ?? {},
+  targetDirectory
+);
 
 if (target.setup) {
   console.error(`[prepare] setup ${target.id}: ${target.setup.command} ${target.setup.args.join(" ")}`);
@@ -120,6 +124,7 @@ const manifest = {
   },
   target: {
     ...target,
+    generatedFiles,
     resolvedCommit: targetCommit,
     directory: targetDirectory,
     projectPath: path.resolve(targetDirectory, target.project)
@@ -136,6 +141,25 @@ const manifest = {
 
 writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 console.log(manifestPath);
+
+function writeGeneratedTargetFiles(files, directory) {
+  const records = [];
+  for (const [relativePath, content] of Object.entries(files)) {
+    const outputPath = path.resolve(directory, relativePath);
+    const relative = path.relative(directory, outputPath);
+    if (relative.startsWith("..") || path.isAbsolute(relative)) {
+      throw new Error(`Generated target file escapes target directory: ${relativePath}`);
+    }
+    mkdirSync(path.dirname(outputPath), { recursive: true });
+    writeFileSync(outputPath, content, "utf8");
+    records.push({
+      path: relativePath,
+      sha256: createHash("sha256").update(content).digest("hex"),
+      sizeBytes: Buffer.byteLength(content)
+    });
+  }
+  return records;
+}
 
 function cloneRef(repository, ref, directory) {
   rmSync(directory, { recursive: true, force: true });
