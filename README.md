@@ -29,6 +29,8 @@ This repository compares classic TypeScript and `typescript-go` in several areas
 - benchmark behavior on different project shapes
 - CLI compatibility for CI-oriented scenarios
 
+See the full scenario overview in [`docs/compatibility-matrix.md`](./docs/compatibility-matrix.md) and current upstream tracking in [`docs/upstream-watch.md`](./docs/upstream-watch.md).
+
 ---
 
 ## Current findings

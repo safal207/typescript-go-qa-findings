@@ -1,12 +1,15 @@
 # Finding: `tsconfig` extends + paths behavior mismatch
 
 - Local repo issue: https://github.com/safal207/typescript-go-qa-findings/issues/5
-- Status: candidate / needs upstream report
+- Upstream issue: https://github.com/microsoft/typescript-go/issues/4435
+- Status: reported upstream / waiting for maintainer response
 - Scenario: `extends` + `baseUrl` + wildcard `paths`
 
 ## Summary
 
 A `tsconfig` scenario using inherited compiler options, `baseUrl`, and wildcard `paths` produced different behavior between classic `tsc` and `typescript-go`.
+
+The mismatch affects both diagnostics and process exit code.
 
 ## Repro
 
@@ -57,8 +60,21 @@ Exit code: `1`
 
 A behavior mismatch here may affect migration safety because users can get different diagnostics and different process exit codes from equivalent project configuration.
 
+This is especially relevant for teams validating TypeScript Go against existing codebases where path aliases and inherited configs are common.
+
+## Current upstream watch
+
+The finding has been reported upstream as:
+
+- https://github.com/microsoft/typescript-go/issues/4435
+
+Next useful updates to watch for:
+
+- maintainer confirmation or clarification
+- labels such as CLI/config/module resolution
+- a linked PR
+- requests for additional repro data or version checks
+
 ## Notes
 
 This finding may be related to TypeScript 7 migration behavior around `baseUrl` removal/deprecation and path alias validation.
-
-The next step is to report this upstream with the minimal reproduction and CI output.
