@@ -150,7 +150,7 @@ function generateTypeHeavy() {
         `export interface Entity${name} {`,
         "  id: string;",
         `  kind: "entity-${name}";`,
-        "  state: " + '"new" | "active" | "paused" | "closed";' ,
+        "  state: \"new\" | \"active\" | \"paused\" | \"closed\";",
         "  coordinates: readonly [number, number, number?];",
         `  nested: { owner: { id: string; name: string }; metrics: Record<"m0" | "m1" | "m2", number> };`,
         "}",
@@ -197,11 +197,10 @@ function generateModuleResolutionHeavy() {
   const moduleCount = 72 * scale;
 
   writeTsconfig(directory, {
-    baseUrl: ".",
     paths: {
-      "@core/*": ["src/core/*"],
-      "@shared/*": ["src/shared/*"],
-      "@feature/*": ["src/features/*"]
+      "@core/*": ["./src/core/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@feature/*": ["./src/features/*"]
     }
   });
 
