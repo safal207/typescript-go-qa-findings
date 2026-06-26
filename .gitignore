@@ -2,9 +2,11 @@ node_modules/
 .bench-workloads/
 .bench-arena/
 .bench-gc/
+.gc-policy-artifacts/
 benchmarks/arena/traces/*.trace
 benchmarks/arena/traces/manifest.json
 results/performance/
 results/profiles/
 results/arena/
 results/gc-policy/
+results/gc-policy-matrix/
