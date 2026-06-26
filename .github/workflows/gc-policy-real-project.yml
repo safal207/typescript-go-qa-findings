@@ -1,0 +1,89 @@
+name: Real-project GC policy
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/gc-policy-real-project.yml"
+      - "benchmarks/gc-policy/**"
+      - "scripts/prepare-gc-policy-benchmark.mjs"
+      - "scripts/benchmark-gc-policy.mjs"
+      - "package.json"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Benchmark target ID from benchmarks/gc-policy/targets.json
+        required: false
+        default: date-fns-v4.1.0
+      warmups:
+        description: Warm-up iterations per GC mode
+        required: false
+        default: "1"
+      iterations:
+        description: Measured iterations per GC mode
+        required: false
+        default: "5"
+
+concurrency:
+  group: gc-policy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-project-gc-policy:
+    name: GC policy (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.26.x
+
+      - name: Record toolchains
+        run: |
+          node --version
+          npm --version
+          go version
+          git --version
+
+      - name: Prepare pinned compiler and real project
+        env:
+          GC_BENCH_TARGET: ${{ inputs.target || 'date-fns-v4.1.0' }}
+        run: npm run benchmark:gc-prepare
+
+      - name: Run GC policy matrix
+        env:
+          GC_BENCH_TARGET: ${{ inputs.target || 'date-fns-v4.1.0' }}
+          GC_BENCH_WARMUPS: ${{ inputs.warmups || '1' }}
+          GC_BENCH_ITERATIONS: ${{ inputs.iterations || '3' }}
+          GC_BENCH_CAPTURE_EVIDENCE: "1"
+        run: npm run benchmark:gc-policy
+
+      - name: Upload GC policy evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gc-policy-${{ matrix.os }}
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            .bench-gc/manifest.json
+            .bench-gc/typescript-go-benchmark.patch
+            results/gc-policy/**/*.json
+            results/gc-policy/**/*.md
+            results/gc-policy/**/*.txt
+            results/gc-policy/**/*.trace
+            results/gc-policy/**/*.pb.gz
