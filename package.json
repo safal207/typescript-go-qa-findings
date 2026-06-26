@@ -12,7 +12,8 @@
     "compare:declaration-emit": "node ./scripts/compare-declaration-emit.mjs",
     "compare:project-references": "node ./scripts/compare-project-references.mjs",
     "compare:tsconfig-extends": "node ./scripts/compare-tsconfig-extends.mjs",
-    "benchmark:checkers": "node ./scripts/benchmark-checkers.mjs"
+    "benchmark:checkers": "node ./scripts/benchmark-checkers.mjs",
+    "benchmark:baseline": "node ./scripts/benchmark-baseline.mjs"
   },
   "devDependencies": {
     "typescript": "latest",
