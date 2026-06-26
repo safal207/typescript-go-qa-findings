@@ -21,6 +21,7 @@
     "benchmark:arena": "node ./scripts/benchmark-arenas.mjs",
     "benchmark:gc-prepare": "node ./scripts/prepare-gc-policy-benchmark.mjs",
     "benchmark:gc-policy": "node ./scripts/benchmark-gc-policy-balanced.mjs",
+    "benchmark:gc-evidence": "node ./scripts/analyze-gc-policy-evidence.mjs",
     "benchmark:gc-policy:legacy": "node ./scripts/benchmark-gc-policy.mjs"
   },
   "devDependencies": {
