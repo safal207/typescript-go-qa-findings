@@ -74,9 +74,11 @@ jobs:
         run: npm run profile:tsgo
 
       - name: Upload QA outputs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: qa-check-results
+          if-no-files-found: warn
           path: |
             results/ci/*.txt
             results/benchmark/*.md
