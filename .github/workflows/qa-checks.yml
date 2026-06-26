@@ -28,6 +28,7 @@ jobs:
         run: |
           mkdir -p results/ci
           mkdir -p results/benchmark
+          mkdir -p results/performance
 
       - name: Compare exit code behavior
         run: npm run compare:exit | tee results/ci/exit-code-noemit.txt
@@ -53,6 +54,13 @@ jobs:
         run: npm run benchmark:checkers | tee results/benchmark/checkers-matrix.md
         continue-on-error: true
 
+      - name: Run statistical baseline smoke
+        env:
+          BENCH_WARMUPS: 1
+          BENCH_ITERATIONS: 3
+          BENCH_CHECKERS: 1,2,4,8
+        run: npm run benchmark:baseline
+
       - name: Upload QA outputs
         uses: actions/upload-artifact@v4
         with:
@@ -60,3 +68,5 @@ jobs:
           path: |
             results/ci/*.txt
             results/benchmark/*.md
+            results/performance/*.json
+            results/performance/*.md
