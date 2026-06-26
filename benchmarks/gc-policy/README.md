@@ -18,6 +18,19 @@ The same pinned `typescript-go` source and real TypeScript project are compiled 
 
 The dynamic policy is benchmark-only instrumentation. It is inserted after the `--lsp` / `--api` routing check, so it does not change language-server or API execution.
 
+## Order-bias control
+
+Measured runs use a deterministic rotating Latin order. With five measured rounds, every mode appears exactly once in each execution position.
+
+This prevents a mode from receiving a systematic advantage from:
+
+- filesystem cache warming;
+- CPU frequency ramp-up;
+- runner initialization;
+- always running first or last.
+
+The report fails its evidence gate when the measured-round count is not a multiple of five.
+
 ## Initial real project
 
 The first bounded target is `date-fns` v4.1.0. The preparation manifest records the resolved Git commits and toolchain versions on every run.
@@ -35,8 +48,8 @@ Controls:
 
 ```bash
 GC_BENCH_TARGET=date-fns-v4.1.0 \
-GC_BENCH_WARMUPS=2 \
-GC_BENCH_ITERATIONS=7 \
+GC_BENCH_WARMUPS=1 \
+GC_BENCH_ITERATIONS=10 \
 npm run benchmark:gc-policy
 ```
 
@@ -49,6 +62,7 @@ Timed samples run without `GODEBUG=gctrace=1`, CPU profiling, or runtime tracing
 Every timed run records:
 
 - wall-clock duration;
+- execution round and position;
 - Linux process peak RSS where available;
 - exit status;
 - normalized diagnostic hash;
@@ -75,6 +89,7 @@ A non-zero compiler status is acceptable when it is stable and identical across 
 
 One project produces a signal only when:
 
+- execution positions are balanced;
 - parity passes;
 - the fastest policy improves median wall-clock time by at least 5%.
 
