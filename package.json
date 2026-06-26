@@ -18,7 +18,9 @@
     "benchmark:matrix": "node ./scripts/benchmark-workload-matrix.mjs",
     "profile:tsgo": "node ./scripts/profile-tsgo.mjs",
     "benchmark:arena-traces": "node ./scripts/generate-arena-traces.mjs",
-    "benchmark:arena": "node ./scripts/benchmark-arenas.mjs"
+    "benchmark:arena": "node ./scripts/benchmark-arenas.mjs",
+    "benchmark:gc-prepare": "node ./scripts/prepare-gc-policy-benchmark.mjs",
+    "benchmark:gc-policy": "node ./scripts/benchmark-gc-policy.mjs"
   },
   "devDependencies": {
     "typescript": "latest",
