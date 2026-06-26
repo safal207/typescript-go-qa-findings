@@ -16,7 +16,9 @@
     "benchmark:baseline": "node ./scripts/benchmark-baseline.mjs",
     "benchmark:fixtures": "node ./scripts/generate-benchmark-fixtures.mjs",
     "benchmark:matrix": "node ./scripts/benchmark-workload-matrix.mjs",
-    "profile:tsgo": "node ./scripts/profile-tsgo.mjs"
+    "profile:tsgo": "node ./scripts/profile-tsgo.mjs",
+    "benchmark:arena-traces": "node ./scripts/generate-arena-traces.mjs",
+    "benchmark:arena": "node ./scripts/benchmark-arenas.mjs"
   },
   "devDependencies": {
     "typescript": "latest",
