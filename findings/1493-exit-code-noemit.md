@@ -3,7 +3,10 @@
 - Issue: https://github.com/microsoft/typescript-go/issues/1493
 - Status: confirmed on TypeScript 7.0.2 stable / active upstream fix
 - Related PR: https://github.com/microsoft/typescript-go/pull/4407
-- Stable evidence: [full report](https://github.com/safal207/typescript-7-rc-qa-benchmark/blob/agent/typescript-7-stable-validation/docs/results/2026-07-10-typescript-7-stable-full.md), [workflow run 29120482675](https://github.com/safal207/typescript-7-rc-qa-benchmark/actions/runs/29120482675)
+- Stable harness revision: [`0622e687d494ddb68244068d470d00fa45ad37aa`](https://github.com/safal207/typescript-7-rc-qa-benchmark/commit/0622e687d494ddb68244068d470d00fa45ad37aa)
+- Immutable report: [`74708feaa92203d4a29b19b472a0e8fc4fa7ed58`](https://github.com/safal207/typescript-7-rc-qa-benchmark/blob/74708feaa92203d4a29b19b472a0e8fc4fa7ed58/docs/results/2026-07-10-typescript-7-stable-full.md)
+- Workflow run: [29120482675](https://github.com/safal207/typescript-7-rc-qa-benchmark/actions/runs/29120482675)
+- Evidence artifacts: Ubuntu `8238612637`, Windows `8238611050`, macOS `8238542656`
 - Platforms: Ubuntu, Windows, macOS
 
 ## Summary
@@ -19,7 +22,9 @@ The same result reproduced across all three GitHub-hosted operating systems. Thi
 
 ## Evidence provenance
 
-The exact stable versions were validated in the separate pinned harness [`safal207/typescript-7-rc-qa-benchmark#11`](https://github.com/safal207/typescript-7-rc-qa-benchmark/pull/11), which verifies that `tsc6` selects 6.0.3 and `tsc` selects 7.0.2 before collecting evidence.
+The exact stable versions were validated at frozen harness revision [`0622e687d494ddb68244068d470d00fa45ad37aa`](https://github.com/safal207/typescript-7-rc-qa-benchmark/commit/0622e687d494ddb68244068d470d00fa45ad37aa). That revision verifies that `tsc6` selects 6.0.3 and `tsc` selects 7.0.2 before collecting evidence.
+
+The dated report is linked at its creation commit [`74708feaa92203d4a29b19b472a0e8fc4fa7ed58`](https://github.com/safal207/typescript-7-rc-qa-benchmark/blob/74708feaa92203d4a29b19b472a0e8fc4fa7ed58/docs/results/2026-07-10-typescript-7-stable-full.md). Workflow run `29120482675`, artifact IDs, and SHA-256 artifact digests recorded in that report provide the immutable execution identity.
 
 This repository's local repro remains useful for continuous preview checks, but its `latest` dependencies are not the source of the dated exact-version claim.
 
@@ -83,7 +88,7 @@ Additional maintainer review context:
 
 ## Upstream publication status
 
-An attempt to post the stable cross-platform confirmation through the connected GitHub integration returned HTTP 403. The reviewed [comment draft](https://github.com/safal207/typescript-7-rc-qa-benchmark/blob/agent/typescript-7-stable-validation/docs/upstream/1493-stable-follow-up.md) is preserved for an account with upstream comment permission.
+An attempt to post the stable cross-platform confirmation through the connected GitHub integration returned HTTP 403. The reviewed draft is preserved at immutable revision [`7a6c5ff9e2adc513bb66135bcfd19c5c59bf4ef8`](https://github.com/safal207/typescript-7-rc-qa-benchmark/blob/7a6c5ff9e2adc513bb66135bcfd19c5c59bf4ef8/docs/upstream/1493-stable-follow-up.md) for an account with upstream comment permission.
 
 ## Next action
 
@@ -99,7 +104,8 @@ This finding demonstrates a useful compatibility-testing pattern:
 2. Treat exit codes as part of the public CLI contract.
 3. Reproduce on multiple operating systems.
 4. Pin and verify compiler identities before publication.
-5. Follow the finding through maintainer review to verify that the fix aligns with upstream compiler semantics.
+5. Record immutable source revision, workflow run, artifact IDs, and digests.
+6. Follow the finding through maintainer review to verify that the fix aligns with upstream compiler semantics.
 
 ## Repro
 
