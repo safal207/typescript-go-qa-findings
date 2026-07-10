@@ -1,0 +1,124 @@
+name: Real-project GC policy
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/gc-policy-real-project.yml"
+      - "benchmarks/gc-policy/**"
+      - "scripts/prepare-gc-policy-benchmark.mjs"
+      - "scripts/benchmark-gc-policy.mjs"
+      - "scripts/benchmark-gc-policy-balanced.mjs"
+      - "scripts/analyze-gc-policy-evidence.mjs"
+      - "scripts/aggregate-gc-policy-matrix.mjs"
+      - "package.json"
+  workflow_dispatch:
+    inputs:
+      warmups:
+        description: Warm-up rounds across all GC modes
+        required: false
+        default: "1"
+      iterations:
+        description: Measured rounds; use a multiple of five for balanced positions
+        required: false
+        default: "5"
+
+concurrency:
+  group: gc-policy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-project-gc-policy:
+    name: GC policy (${{ matrix.target }}, ${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        target: [date-fns-v4.1.0, type-fest-v5.7.0]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.26.x
+
+      - name: Record toolchains
+        run: |
+          node --version
+          npm --version
+          go version
+          git --version
+
+      - name: Prepare pinned compiler and real project
+        env:
+          GC_BENCH_TARGET: ${{ matrix.target }}
+        run: npm run benchmark:gc-prepare
+
+      - name: Run order-balanced GC policy matrix
+        env:
+          GC_BENCH_TARGET: ${{ matrix.target }}
+          GC_BENCH_WARMUPS: ${{ inputs.warmups || '1' }}
+          GC_BENCH_ITERATIONS: ${{ inputs.iterations || '5' }}
+          GC_BENCH_CAPTURE_EVIDENCE: "1"
+        run: npm run benchmark:gc-policy
+
+      - name: Analyze pprof and runtime-trace evidence
+        run: npm run benchmark:gc-evidence
+
+      - name: Upload GC policy evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gc-policy-${{ matrix.target }}-${{ matrix.os }}
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            .bench-gc/manifest.json
+            .bench-gc/typescript-go-benchmark.patch
+            results/gc-policy/**/*.json
+            results/gc-policy/**/*.md
+            results/gc-policy/**/*.txt
+            results/gc-policy/**/*.trace
+            results/gc-policy/**/*.pb.gz
+
+  aggregate-evidence:
+    name: Aggregate GC policy evidence
+    needs: real-project-gc-policy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download project and OS evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gc-policy-*
+          path: .gc-policy-artifacts
+
+      - name: Evaluate cross-project evidence gates
+        run: npm run benchmark:gc-aggregate
+
+      - name: Upload cross-project matrix
+        uses: actions/upload-artifact@v4
+        with:
+          name: gc-policy-cross-project-matrix
+          retention-days: 30
+          path: |
+            results/gc-policy-matrix/*.json
+            results/gc-policy-matrix/*.md

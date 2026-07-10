@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "typescriptGo": {
+    "repository": "https://github.com/microsoft/typescript-go.git",
+    "commit": "c080da62e73c5ea066b381303c74ae00b53368ac"
+  },
+  "targets": [
+    {
+      "id": "date-fns-v4.1.0",
+      "repository": "https://github.com/date-fns/date-fns.git",
+      "ref": "v4.1.0",
+      "project": "tsconfig.json",
+      "setup": {
+        "command": "npm",
+        "args": ["ci", "--ignore-scripts", "--no-audit", "--no-fund"]
+      },
+      "compilerArgs": ["-p", "tsconfig.json", "--noEmit"],
+      "description": "Real library project with source, scripts, and tests under one strict NodeNext configuration."
+    },
+    {
+      "id": "type-fest-v5.7.0",
+      "repository": "https://github.com/sindresorhus/type-fest.git",
+      "ref": "v5.7.0",
+      "project": "tsconfig.gc-bench.json",
+      "generatedFiles": {
+        "tsconfig.gc-bench.json": "{\n  \"compilerOptions\": {\n    \"noEmit\": true,\n    \"strict\": true,\n    \"target\": \"ES2022\",\n    \"module\": \"NodeNext\",\n    \"moduleResolution\": \"NodeNext\",\n    \"lib\": [\"ES2022\", \"DOM\", \"DOM.Iterable\"],\n    \"types\": [],\n    \"skipLibCheck\": false,\n    \"exactOptionalPropertyTypes\": true\n  },\n  \"include\": [\"index.d.ts\", \"source/**/*.d.ts\"]\n}\n"
+      },
+      "setup": {
+        "command": "npm",
+        "args": [
+          "install",
+          "--ignore-scripts",
+          "--no-save",
+          "--no-audit",
+          "--no-fund",
+          "tagged-tag@1.0.0"
+        ]
+      },
+      "compilerArgs": ["-p", "tsconfig.gc-bench.json"],
+      "description": "Real type-level library source compiled through a pinned benchmark tsconfig, emphasizing conditional and mapped type evaluation without its unrelated lint/test toolchain."
+    }
+  ]
+}
