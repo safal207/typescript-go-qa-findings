@@ -37,9 +37,9 @@ See the full scenario overview in [`docs/compatibility-matrix.md`](./docs/compat
 
 | ID | Topic | Status | Result |
 |---|---|---:|---|
-| [#1493](https://github.com/microsoft/typescript-go/issues/1493) | `--noEmit` exit code mismatch | confirmed / active fix via [PR #4407](https://github.com/microsoft/typescript-go/pull/4407) | `tsc` returned exit code `2`, `typescript-go` returned `1`; review expanded the fix across shared `noEmit`, incremental, builder, and watch semantics |
+| [#1493](https://github.com/microsoft/typescript-go/issues/1493) | `--noEmit` exit code mismatch | confirmed on TypeScript 7.0.2 stable / active fix via [PR #4407](https://github.com/microsoft/typescript-go/pull/4407) | reproduced on Ubuntu, Windows, and macOS: diagnostic codes and normalized text match, but classic TypeScript exits `2` and TypeScript 7 exits `1` |
 | [#4435](https://github.com/microsoft/typescript-go/issues/4435) | `tsconfig` extends + `baseUrl` + wildcard `paths` difference | closed / Working As Intended | the diagnostics and exit-code difference is expected because `baseUrl` is removed in TypeScript 7; retained as migration evidence rather than an unresolved regression |
-| [#4406](https://github.com/microsoft/typescript-go/issues/4406) | benchmark observation | completed | benchmark feedback accepted; maintainer suggested trying `--checkers` tuning and the broader local matrix was implemented |
+| [#4406](https://github.com/microsoft/typescript-go/issues/4406) | benchmark observation | completed | benchmark feedback accepted; maintainer suggested trying `--checkers` tuning, the broader local matrix was implemented, and the stable smoke matrix passed on all three CI operating systems |
 
 ---
 
@@ -49,9 +49,9 @@ This repository is not only a collection of test cases. It is intended as a smal
 
 So far, the work has already produced upstream-facing results:
 
-- **Issue #1493** — a real exit-code compatibility defect for `--noEmit` type-error scenarios, now addressed by an active fix PR under maintainer review
+- **Issue #1493** — a real exit-code compatibility defect for `--noEmit` type-error scenarios, confirmed again on TypeScript 7.0.2 stable across Ubuntu, Windows, and macOS
 - **Issue #4435** — a reproducible configuration difference that maintainers classified as intentional because `baseUrl` is removed in TypeScript 7
-- **Issue #4406** — an independent cross-platform benchmark accepted as useful feedback, followed by a larger local checker-scaling experiment
+- **Issue #4406** — an independent cross-platform benchmark accepted as useful feedback, followed by larger checker-scaling and stable smoke experiments
 
 These cases matter because they affect:
 
@@ -71,16 +71,18 @@ The goal is to make both defects and intentional version-boundary changes reprod
 
 - Issue: [microsoft/typescript-go#1493](https://github.com/microsoft/typescript-go/issues/1493)
 - Related PR: [microsoft/typescript-go#4407](https://github.com/microsoft/typescript-go/pull/4407)
-- Current state: the issue and fix PR remain open; stable-release re-testing is required
+- Current state: reproduced on TypeScript 7.0.2 stable on Ubuntu, Windows, and macOS; the issue and fix PR remain open
 
-A minimal project with a type error and `--noEmit` produced equivalent diagnostics in both compilers, but different process exit codes:
+A minimal project with a type error and `--noEmit` produces equivalent diagnostic codes and equivalent text after CRLF/LF normalization, but different process exit codes:
 
-- `tsc` -> exit code `2`
-- `typescript-go` -> exit code `1`
+- classic TypeScript 6.0.3 -> exit code `2`
+- TypeScript 7.0.2 -> exit code `1`
 
 This matters because exit codes are part of the CLI contract used by CI pipelines, shell scripts, wrappers, and automation.
 
-The maintainer review showed that the finding was deeper than a final numeric exit-code mapping. The proposed fix now aligns shared `noEmit` handling across non-incremental and incremental program emit paths and updates builder/watch baselines to match classic `tsc` behavior.
+The maintainer review showed that the finding was deeper than a final numeric exit-code mapping. The proposed fix aligns shared `noEmit` handling across non-incremental and incremental program emit paths and updates builder/watch baselines to match classic `tsc` behavior.
+
+The stable cross-platform reproduction confirms that the finding was not limited to an RC package. The next action is to share the stable evidence upstream and re-test after PR #4407 lands.
 
 See: [`findings/1493-exit-code-noemit.md`](./findings/1493-exit-code-noemit.md)
 
@@ -104,6 +106,8 @@ See: [`findings/tsconfig-paths-extends-exit-diagnostics.md`](./findings/tsconfig
 - Issue: [microsoft/typescript-go#4406](https://github.com/microsoft/typescript-go/issues/4406)
 
 Benchmark results were shared with the TypeScript team. The issue was closed as completed, and maintainer feedback suggested trying larger `--checkers` values depending on project shape. That follow-up was implemented locally as a broader checker-scaling matrix.
+
+The TypeScript 7.0.2 stable smoke and checker-scaling workflows subsequently passed on Ubuntu, Windows, and macOS. A configurable full-profile run remains the gate before publishing final stable performance ranges.
 
 See: [`findings/4406-benchmark-observation.md`](./findings/4406-benchmark-observation.md)
 
@@ -200,11 +204,12 @@ This makes the repository useful as a lightweight regression lab rather than a s
 
 ## Planned regression scenarios
 
-- stable TypeScript 7 re-test of `--noEmit` exit behavior
+- post-fix re-test of `--noEmit` exit behavior
 - diagnostics parity checks
 - incremental build behavior
 - watch mode checks
 - fix / stabilize the declaration emit scenario
+- full stable performance evidence profile
 
 See: [`docs/roadmap.md`](./docs/roadmap.md)
 
