@@ -1,15 +1,16 @@
-# Finding: `tsconfig` extends + paths behavior mismatch
+# Finding: TypeScript 6→7 `tsconfig` migration difference
 
 - Local repo issue: https://github.com/safal207/typescript-go-qa-findings/issues/5
 - Upstream issue: https://github.com/microsoft/typescript-go/issues/4435
-- Status: reported upstream / waiting for maintainer response
+- Status: closed upstream as **Working As Intended**
+- Classification: intentional TypeScript 6→7 version-boundary change / migration evidence
 - Scenario: `extends` + `baseUrl` + wildcard `paths`
 
 ## Summary
 
-A `tsconfig` scenario using inherited compiler options, `baseUrl`, and wildcard `paths` produced different behavior between classic `tsc` and `typescript-go`.
+A `tsconfig` scenario using inherited compiler options, `baseUrl`, and wildcard `paths` produced different behavior between classic TypeScript 6 and TypeScript 7.
 
-The mismatch affects both diagnostics and process exit code.
+The difference affects both diagnostics and process exit code, but upstream maintainers confirmed that it is expected because `baseUrl` is removed in TypeScript 7. It is therefore not tracked as an unresolved implementation-parity defect.
 
 ## Repro
 
@@ -23,11 +24,11 @@ Command:
 npm run compare:tsconfig-extends
 ```
 
-## CI result
+The local command uses the versions currently installed by this repository's moving preview lane. The exact output below records the original TypeScript 6→7 migration comparison.
 
-From the QA workflow artifact:
+## Recorded result
 
-### classic `tsc`
+### classic TypeScript 6
 
 ```text
 tsconfig.json(4,5): error TS5101: Option 'baseUrl' is deprecated and will stop functioning in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"' to silence this error.
@@ -36,7 +37,7 @@ tsconfig.json(4,5): error TS5101: Option 'baseUrl' is deprecated and will stop f
 
 Exit code: `2`
 
-### `typescript-go`
+### TypeScript 7
 
 ```text
 tsconfig.json(4,5): error TS5102: Option 'baseUrl' has been removed. Please remove it from your configuration.
@@ -48,7 +49,7 @@ Exit code: `1`
 
 ## Difference
 
-| Area | classic `tsc` | `typescript-go` |
+| Area | classic TypeScript 6 | TypeScript 7 |
 |---|---:|---:|
 | Exit code | `2` | `1` |
 | Main diagnostic | `TS5101` | `TS5102` |
@@ -58,23 +59,16 @@ Exit code: `1`
 
 `extends`, `baseUrl`, and `paths` are common TypeScript configuration patterns in frontend, backend, and monorepo projects.
 
-A behavior mismatch here may affect migration safety because users can get different diagnostics and different process exit codes from equivalent project configuration.
+This repro is useful for migration tooling and documentation because teams moving from TypeScript 6 to TypeScript 7 can receive different diagnostics and process status for the same inherited configuration. It should be interpreted as an expected breaking-change boundary, not as proof that the native compiler is incorrectly diverging from TypeScript 7 semantics.
 
-This is especially relevant for teams validating TypeScript Go against existing codebases where path aliases and inherited configs are common.
+## Upstream resolution
 
-## Current upstream watch
-
-The finding has been reported upstream as:
+The finding was reported as:
 
 - https://github.com/microsoft/typescript-go/issues/4435
 
-Next useful updates to watch for:
+The issue was closed as **Working As Intended**. Maintainer guidance explains that the observed behavioral difference is expected because `baseUrl` is no longer supported in TypeScript 7.
 
-- maintainer confirmation or clarification
-- labels such as CLI/config/module resolution
-- a linked PR
-- requests for additional repro data or version checks
+## Next action
 
-## Notes
-
-This finding may be related to TypeScript 7 migration behavior around `baseUrl` removal/deprecation and path alias validation.
+Keep this minimal repro as migration evidence. Re-run it only when validating migration messaging or when a later TypeScript version changes the configuration contract again.
