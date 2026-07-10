@@ -31,6 +31,15 @@ This repository compares classic TypeScript and `typescript-go` in several areas
 
 See the full scenario overview in [`docs/compatibility-matrix.md`](./docs/compatibility-matrix.md) and current upstream tracking in [`docs/upstream-watch.md`](./docs/upstream-watch.md).
 
+### Evidence provenance
+
+This project has two intentionally different evidence lanes:
+
+1. **Pinned stable publication evidence.** Exact TypeScript 6.0.3 versus TypeScript 7.0.2 claims come from [`safal207/typescript-7-rc-qa-benchmark#11`](https://github.com/safal207/typescript-7-rc-qa-benchmark/pull/11). That harness pins the compilers, verifies command selection, runs cross-platform matrices, and publishes the [full stable report](https://github.com/safal207/typescript-7-rc-qa-benchmark/blob/agent/typescript-7-stable-validation/docs/results/2026-07-10-typescript-7-stable-full.md).
+2. **Continuous preview regression evidence.** This repository currently installs `typescript@latest` and `@typescript/native-preview@latest`. Local `npm run compare:*` commands therefore exercise the installed preview versions and are not the source of historical exact-version claims.
+
+This separation prevents moving preview dependencies from silently rewriting the meaning of a dated stable result.
+
 ---
 
 ## Current findings
@@ -38,8 +47,8 @@ See the full scenario overview in [`docs/compatibility-matrix.md`](./docs/compat
 | ID | Topic | Status | Result |
 |---|---|---:|---|
 | [#1493](https://github.com/microsoft/typescript-go/issues/1493) | `--noEmit` exit code mismatch | confirmed on TypeScript 7.0.2 stable / active fix via [PR #4407](https://github.com/microsoft/typescript-go/pull/4407) | reproduced on Ubuntu, Windows, and macOS: diagnostic codes and normalized text match, but classic TypeScript exits `2` and TypeScript 7 exits `1` |
-| [#4435](https://github.com/microsoft/typescript-go/issues/4435) | `tsconfig` extends + `baseUrl` + wildcard `paths` difference | closed / Working As Intended | the diagnostics and exit-code difference is expected because `baseUrl` is removed in TypeScript 7; retained as migration evidence rather than an unresolved regression |
-| [#4406](https://github.com/microsoft/typescript-go/issues/4406) | benchmark observation | completed | benchmark feedback accepted; maintainer suggested trying `--checkers` tuning, the broader local matrix was implemented, and the stable smoke matrix passed on all three CI operating systems |
+| [#4435](https://github.com/microsoft/typescript-go/issues/4435) | `tsconfig` extends + `baseUrl` + wildcard `paths` difference | closed / Working As Intended | intentional TypeScript 6→7 boundary because `baseUrl` is removed in TypeScript 7; retained as migration evidence |
+| [#4406](https://github.com/microsoft/typescript-go/issues/4406) | benchmark observation | completed | checker-scaling and full stable profiles completed; the full documented speedup range is 4.51×–6.18× for the tested workloads |
 
 ---
 
@@ -51,7 +60,7 @@ So far, the work has already produced upstream-facing results:
 
 - **Issue #1493** — a real exit-code compatibility defect for `--noEmit` type-error scenarios, confirmed again on TypeScript 7.0.2 stable across Ubuntu, Windows, and macOS
 - **Issue #4435** — a reproducible configuration difference that maintainers classified as intentional because `baseUrl` is removed in TypeScript 7
-- **Issue #4406** — an independent cross-platform benchmark accepted as useful feedback, followed by larger checker-scaling and stable smoke experiments
+- **Issue #4406** — an independent cross-platform benchmark accepted as useful feedback, followed by checker-scaling and full stable evidence
 
 These cases matter because they affect:
 
@@ -72,6 +81,7 @@ The goal is to make both defects and intentional version-boundary changes reprod
 - Issue: [microsoft/typescript-go#1493](https://github.com/microsoft/typescript-go/issues/1493)
 - Related PR: [microsoft/typescript-go#4407](https://github.com/microsoft/typescript-go/pull/4407)
 - Current state: reproduced on TypeScript 7.0.2 stable on Ubuntu, Windows, and macOS; the issue and fix PR remain open
+- Evidence: [full stable report](https://github.com/safal207/typescript-7-rc-qa-benchmark/blob/agent/typescript-7-stable-validation/docs/results/2026-07-10-typescript-7-stable-full.md), [workflow run 29120482675](https://github.com/safal207/typescript-7-rc-qa-benchmark/actions/runs/29120482675)
 
 A minimal project with a type error and `--noEmit` produces equivalent diagnostic codes and equivalent text after CRLF/LF normalization, but different process exit codes:
 
@@ -82,7 +92,7 @@ This matters because exit codes are part of the CLI contract used by CI pipeline
 
 The maintainer review showed that the finding was deeper than a final numeric exit-code mapping. The proposed fix aligns shared `noEmit` handling across non-incremental and incremental program emit paths and updates builder/watch baselines to match classic `tsc` behavior.
 
-The stable cross-platform reproduction confirms that the finding was not limited to an RC package. The next action is to share the stable evidence upstream and re-test after PR #4407 lands.
+The stable cross-platform reproduction confirms that the finding was not limited to an RC package. An attempt to publish the stable confirmation upstream through the connected integration returned HTTP 403. The reviewed [upstream comment draft](https://github.com/safal207/typescript-7-rc-qa-benchmark/blob/agent/typescript-7-stable-validation/docs/upstream/1493-stable-follow-up.md) is preserved; the next actions are to retry it with sufficient permission and re-test after PR #4407 lands.
 
 See: [`findings/1493-exit-code-noemit.md`](./findings/1493-exit-code-noemit.md)
 
@@ -95,7 +105,7 @@ See: [`findings/1493-exit-code-noemit.md`](./findings/1493-exit-code-noemit.md)
 
 A minimal config scenario using `extends`, `baseUrl`, and wildcard `paths` produced different diagnostics and a different exit code between classic TypeScript 6 and TypeScript 7.
 
-The maintainer response clarified that this difference is expected because `baseUrl` is removed in TypeScript 7. The scenario therefore remains valuable as a migration test and documentation case, but it is no longer classified as an unresolved compiler regression.
+The maintainer response clarified that this difference is expected because `baseUrl` is removed in TypeScript 7. The scenario therefore remains valuable as a migration test and documentation case, but it is no longer classified as an unresolved compiler regression or implementation-only incompatibility.
 
 See: [`findings/tsconfig-paths-extends-exit-diagnostics.md`](./findings/tsconfig-paths-extends-exit-diagnostics.md)
 
@@ -105,15 +115,17 @@ See: [`findings/tsconfig-paths-extends-exit-diagnostics.md`](./findings/tsconfig
 
 - Issue: [microsoft/typescript-go#4406](https://github.com/microsoft/typescript-go/issues/4406)
 
-Benchmark results were shared with the TypeScript team. The issue was closed as completed, and maintainer feedback suggested trying larger `--checkers` values depending on project shape. That follow-up was implemented locally as a broader checker-scaling matrix.
+Benchmark results were shared with the TypeScript team. The issue was closed as completed, and maintainer feedback suggested trying larger `--checkers` values depending on project shape.
 
-The TypeScript 7.0.2 stable smoke and checker-scaling workflows subsequently passed on Ubuntu, Windows, and macOS. A configurable full-profile run remains the gate before publishing final stable performance ranges.
+That follow-up was implemented in a separate checker-scaling workflow. [Run 29121518759](https://github.com/safal207/typescript-7-rc-qa-benchmark/actions/runs/29121518759) passed on Ubuntu, Windows, and macOS. The 15-round full stable profile also completed and is published in the [dated report](https://github.com/safal207/typescript-7-rc-qa-benchmark/blob/agent/typescript-7-stable-validation/docs/results/2026-07-10-typescript-7-stable-full.md).
 
 See: [`findings/4406-benchmark-observation.md`](./findings/4406-benchmark-observation.md)
 
 ---
 
 ## Reproduction
+
+The commands below use this repository's installed preview dependencies unless a finding explicitly links to the pinned stable harness.
 
 ### Exit code scenario
 
@@ -185,13 +197,13 @@ Command:
 npm run benchmark:checkers
 ```
 
-This scenario runs a small type-heavy benchmark sample against classic `tsc` and `typescript-go` with several `--checkers` values.
+This scenario runs a small type-heavy benchmark sample against the locally installed classic and native-preview compilers with several `--checkers` values.
 
 ---
 
 ## Continuous QA
 
-GitHub Actions runs the current compatibility checks on push, pull request, and manual workflow dispatch.
+GitHub Actions runs the current preview compatibility checks on push, pull request, and manual workflow dispatch.
 
 The workflow stores command outputs as artifacts:
 
@@ -209,7 +221,7 @@ This makes the repository useful as a lightweight regression lab rather than a s
 - incremental build behavior
 - watch mode checks
 - fix / stabilize the declaration emit scenario
-- full stable performance evidence profile
+- repeat the pinned stable profile only for a new release, material harness change, or targeted regression hypothesis
 
 See: [`docs/roadmap.md`](./docs/roadmap.md)
 
