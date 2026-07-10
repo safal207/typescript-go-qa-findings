@@ -8,7 +8,7 @@ This repository collects:
 - reproducible compatibility findings
 - CLI behavior checks
 - benchmark observations
-- regression scenarios for RC builds
+- regression scenarios for preview and stable builds
 - issue / PR references for confirmed findings
 
 The goal is to validate whether `typescript-go` is production-safe for real projects, CI pipelines, and existing TypeScript workflows.
@@ -37,9 +37,9 @@ See the full scenario overview in [`docs/compatibility-matrix.md`](./docs/compat
 
 | ID | Topic | Status | Result |
 |---|---|---:|---|
-| [#1493](https://github.com/microsoft/typescript-go/issues/1493) | `--noEmit` exit code mismatch | confirmed / active maintainer review via [PR #4407](https://github.com/microsoft/typescript-go/pull/4407) | `tsc` returned exit code `2`, `typescript-go` returned `1`; review expanded the fix across shared `noEmit`, incremental, builder, and watch semantics |
-| [#4435](https://github.com/microsoft/typescript-go/issues/4435) | `tsconfig` extends + `baseUrl` + wildcard `paths` mismatch | reported upstream | `tsc` and `typescript-go` produced different diagnostics and different exit codes for the same config scenario |
-| [#4406](https://github.com/microsoft/typescript-go/issues/4406) | benchmark observation | completed | benchmark feedback accepted; maintainer suggested trying `--checkers` tuning |
+| [#1493](https://github.com/microsoft/typescript-go/issues/1493) | `--noEmit` exit code mismatch | confirmed / active fix via [PR #4407](https://github.com/microsoft/typescript-go/pull/4407) | `tsc` returned exit code `2`, `typescript-go` returned `1`; review expanded the fix across shared `noEmit`, incremental, builder, and watch semantics |
+| [#4435](https://github.com/microsoft/typescript-go/issues/4435) | `tsconfig` extends + `baseUrl` + wildcard `paths` difference | closed / Working As Intended | the diagnostics and exit-code difference is expected because `baseUrl` is removed in TypeScript 7; retained as migration evidence rather than an unresolved regression |
+| [#4406](https://github.com/microsoft/typescript-go/issues/4406) | benchmark observation | completed | benchmark feedback accepted; maintainer suggested trying `--checkers` tuning and the broader local matrix was implemented |
 
 ---
 
@@ -49,10 +49,11 @@ This repository is not only a collection of test cases. It is intended as a smal
 
 So far, the work has already produced upstream-facing results:
 
-- **Issue #1493** — exit-code mismatch for `--noEmit` type-error scenarios, now addressed by an active fix PR under maintainer review
-- **Issue #4435** — different diagnostics and exit-code behavior for a `tsconfig` scenario using `extends`, `baseUrl`, and wildcard `paths`
+- **Issue #1493** — a real exit-code compatibility defect for `--noEmit` type-error scenarios, now addressed by an active fix PR under maintainer review
+- **Issue #4435** — a reproducible configuration difference that maintainers classified as intentional because `baseUrl` is removed in TypeScript 7
+- **Issue #4406** — an independent cross-platform benchmark accepted as useful feedback, followed by a larger local checker-scaling experiment
 
-These findings matter because they affect:
+These cases matter because they affect:
 
 - CI/CD pipelines
 - shell automation
@@ -60,7 +61,7 @@ These findings matter because they affect:
 - migration safety for existing TypeScript projects
 - monorepo and configuration-heavy codebases
 
-The goal of this repository is to make such differences reproducible, visible, and easy to validate across future RC builds.
+The goal is to make both defects and intentional version-boundary changes reproducible, visible, and easy to interpret across future TypeScript releases.
 
 ---
 
@@ -70,12 +71,12 @@ The goal of this repository is to make such differences reproducible, visible, a
 
 - Issue: [microsoft/typescript-go#1493](https://github.com/microsoft/typescript-go/issues/1493)
 - Related PR: [microsoft/typescript-go#4407](https://github.com/microsoft/typescript-go/pull/4407)
-- Current PR state: open, mergeable, and under review by `jakebailey` and `andrewbranch`
+- Current state: the issue and fix PR remain open; stable-release re-testing is required
 
 A minimal project with a type error and `--noEmit` produced equivalent diagnostics in both compilers, but different process exit codes:
 
 - `tsc` -> exit code `2`
-- `typescript-go` RC -> exit code `1`
+- `typescript-go` -> exit code `1`
 
 This matters because exit codes are part of the CLI contract used by CI pipelines, shell scripts, wrappers, and automation.
 
@@ -85,13 +86,14 @@ See: [`findings/1493-exit-code-noemit.md`](./findings/1493-exit-code-noemit.md)
 
 ---
 
-### 2) `tsconfig` extends + paths mismatch
+### 2) `tsconfig` extends + paths migration difference
 
 - Issue: [microsoft/typescript-go#4435](https://github.com/microsoft/typescript-go/issues/4435)
+- Upstream resolution: closed as **Working As Intended**
 
-A minimal config scenario using `extends`, `baseUrl`, and wildcard `paths` produced different diagnostics and a different exit code between classic `tsc` and `typescript-go`.
+A minimal config scenario using `extends`, `baseUrl`, and wildcard `paths` produced different diagnostics and a different exit code between classic TypeScript 6 and TypeScript 7.
 
-This matters because these configuration patterns are common in frontend apps, backend services, and monorepos, and a mismatch can create migration friction for existing TypeScript projects.
+The maintainer response clarified that this difference is expected because `baseUrl` is removed in TypeScript 7. The scenario therefore remains valuable as a migration test and documentation case, but it is no longer classified as an unresolved compiler regression.
 
 See: [`findings/tsconfig-paths-extends-exit-diagnostics.md`](./findings/tsconfig-paths-extends-exit-diagnostics.md)
 
@@ -101,7 +103,7 @@ See: [`findings/tsconfig-paths-extends-exit-diagnostics.md`](./findings/tsconfig
 
 - Issue: [microsoft/typescript-go#4406](https://github.com/microsoft/typescript-go/issues/4406)
 
-Benchmark results were shared with the TypeScript team. The issue was closed as completed, and maintainer feedback suggested trying larger `--checkers` values depending on project shape.
+Benchmark results were shared with the TypeScript team. The issue was closed as completed, and maintainer feedback suggested trying larger `--checkers` values depending on project shape. That follow-up was implemented locally as a broader checker-scaling matrix.
 
 See: [`findings/4406-benchmark-observation.md`](./findings/4406-benchmark-observation.md)
 
@@ -167,7 +169,7 @@ Command:
 npm run compare:tsconfig-extends
 ```
 
-This scenario compares classic `tsc` and `typescript-go` behavior for a config that uses inherited compiler options, `baseUrl`, and wildcard path aliases.
+This scenario preserves the TypeScript 6 to TypeScript 7 migration boundary for inherited compiler options, `baseUrl`, and wildcard path aliases.
 
 ### Benchmark checkers scenario
 
@@ -198,6 +200,7 @@ This makes the repository useful as a lightweight regression lab rather than a s
 
 ## Planned regression scenarios
 
+- stable TypeScript 7 re-test of `--noEmit` exit behavior
 - diagnostics parity checks
 - incremental build behavior
 - watch mode checks
@@ -218,4 +221,4 @@ They affect:
 - migration safety
 - tooling compatibility
 
-This repository documents those differences with reproducible evidence.
+This repository documents those differences with reproducible evidence and separates true compatibility defects from intentional language and configuration changes.
